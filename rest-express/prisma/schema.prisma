@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id          Int     @id @default(autoincrement())
+  email       String  @unique
+  name        String?
+  habits      Habit[]
+}
+
+model Habit {
+  id                  Int      @id @default(autoincrement())
+  createdAt           DateTime @default(now())
+  name                String
+  numDaysToComplete   Int      @default(0)
+  createdBy           User    @relation(fields: [authorId], references: [id])
+  authorId            Int
+  schedule            Schedule?
+  completionRecords   CompletionRecord[]
+
+}
+
+model Schedule {
+  id                  Int      @id @default(autoincrement())
+  day                 Int      // should be between 0 - 6 (inclusive) for each day of week
+  habit               Habit    @relation(fields: [habitId], references: [id])
+  habitId             Int
+}
+
+model CompletionRecord {
+  id                  Int      @id @default(autoincrement())
+  completedAt         DateTime @default(now())
+  habit               Habit    @relation(fields: [habitId], references: [id])
+  habitId             Int
+}
