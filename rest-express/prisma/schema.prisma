@@ -21,12 +21,12 @@ model Habit {
   numDaysToComplete   Int      @default(0)
   createdBy           User    @relation(fields: [authorId], references: [id])
   authorId            Int
-  schedule            Schedule?
+  scheduleDays        ScheduleDay[]
   completionRecords   CompletionRecord[]
 
 }
 
-model Schedule {
+model ScheduleDay {
   id                  Int      @id @default(autoincrement())
   day                 Int      // should be between 0 - 6 (inclusive) for each day of week
   habit               Habit    @relation(fields: [habitId], references: [id])
@@ -35,7 +35,7 @@ model Schedule {
 
 model CompletionRecord {
   id                  Int      @id @default(autoincrement())
-  completedAt         DateTime @default(now())
+  dateCompleted       DateTime 
   habit               Habit    @relation(fields: [habitId], references: [id])
   habitId             Int
 }
