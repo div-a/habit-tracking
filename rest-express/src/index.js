@@ -37,16 +37,12 @@ app.post(`/habit`, async (req, res) => {
     data: {
       name,
       numDaysToComplete,
-      author: { connect: { email: authorEmail } }
+      // author: { connect: { email: authorEmail } }
+      // scheduleDays: schedule
+      scheduleDays: {
+        create: schedule
+      },
     },
-  });
-
-  const scheduleDayRes = await prisma.scheduleDay.createMany({
-    data: [
-      { day: 4, habitId: result },
-      { day: 1, habitId: result },
-    ],
-    skipDuplicates: true,
   });
 
   res.json(result);
@@ -63,7 +59,16 @@ app.delete(`/habit/:id`, async (req, res) => {
 });
 
 app.get("/habits", async (req, res) => {
-  const habits = await prisma.habit.findMany();
+  const habits = await prisma.habit.findMany({
+    // Returns all user fields
+    include: {
+      scheduleDays: {
+        select: {
+          day: true,
+        },
+      },
+    },
+  });
   res.json(habits);
 });
 

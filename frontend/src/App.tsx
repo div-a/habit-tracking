@@ -27,7 +27,7 @@ enum Day {
   SAT
 }
 
-const instance = axios.create({
+export const instance = axios.create({
   baseURL: 'http://localhost:3000'
 });
 
@@ -60,6 +60,7 @@ export const App = () => {
               </Tr>
             </Thead>
             <Tbody>
+
               <Tr>
                 <Td>Habit1</Td>
                 {[0, 1, 2, 3, 4, 5, 6].map((post) =>
