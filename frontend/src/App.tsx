@@ -13,7 +13,7 @@ import {
   Checkbox
 } from "@chakra-ui/react"
 import { ColorModeSwitcher } from "./ColorModeSwitcher"
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { CreateHabitForm } from "./CreateHabitForm";
 
@@ -31,16 +31,34 @@ export const instance = axios.create({
   baseURL: 'http://localhost:3000'
 });
 
+interface  Habit{
+  createdAt: Date,
+  id: number,
+  name: string,
+  numDaysToComplete: number,
+  scheduleDays: ScheduleDay[]
+}
+
+interface ScheduleDay {
+  day: number
+}
+
 export const App = () => {
+
+  const [habits, setHabits] = useState<Habit[]>([])
 
   useEffect(() => {
     async function fetchMyAPI() {
-      const response = await instance.get('/habits');
-      console.log(response)
+      const {data} = await instance.get<Habit[]>('/habits'); 
+      setHabits(data)
     }
 
     fetchMyAPI();
-  });
+  }, []);
+
+  useEffect(() => {
+    console.log("habits ", habits);
+  }, [habits]);
 
 
   return (<ChakraProvider theme={theme}>
@@ -85,6 +103,17 @@ export const App = () => {
                   </Td>
                 )}
               </Tr>
+
+              {habits.map(h => {
+                return (<Tr>
+                  <Td>{h.name}</Td>
+                    {[0, 1, 2, 3, 4, 5, 6].map((post) =>
+                      <Td key={post}>
+                        {h.scheduleDays.find(sd => sd.day === post) && <Checkbox value={post}></Checkbox>}
+                      </Td>
+                    )}
+                </Tr>)
+              })}
             </Tbody>
           </Table>
 
@@ -95,3 +124,4 @@ export const App = () => {
   </ChakraProvider>
   )
 }
+
