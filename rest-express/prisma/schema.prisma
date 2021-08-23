@@ -19,8 +19,8 @@ model Habit {
   createdAt           DateTime @default(now())
   name                String
   numDaysToComplete   Int      @default(0)
-  createdBy           User    @relation(fields: [authorId], references: [id])
-  authorId            Int
+  createdBy           User?    @relation(fields: [authorId], references: [id])
+  authorId            Int?
   scheduleDays        ScheduleDay[]
   completionRecords   CompletionRecord[]
 
