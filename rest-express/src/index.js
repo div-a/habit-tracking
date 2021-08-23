@@ -1,21 +1,21 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
-var cors = require('cors')
+var cors = require("cors");
 
 const prisma = new PrismaClient();
 const app = express();
 
 app.use(express.json());
 
-app.use(cors())
+app.use(cors());
 
 app.post(`/signup`, async (req, res) => {
   const { name, email, posts } = req.body;
 
   const postData = posts
     ? posts.map((post) => {
-      return { title: post.title, content: post.content || undefined };
-    })
+        return { title: post.title, content: post.content || undefined };
+      })
     : [];
 
   const result = await prisma.user.create({
@@ -30,10 +30,8 @@ app.post(`/signup`, async (req, res) => {
   res.json(result);
 });
 
-
 app.post(`/habit`, async (req, res) => {
   const { name, numDaysToComplete, authorEmail, schedule } = req.body;
-  console.log(req.body)
   // const r = await prisma.scheduleDay.create({
   //   data: {
   //     schedule
@@ -47,7 +45,7 @@ app.post(`/habit`, async (req, res) => {
       // author: { connect: { email: authorEmail } }
       // scheduleDays: schedule
       scheduleDays: {
-        create: schedule
+        create: schedule,
       },
     },
   });
@@ -74,6 +72,11 @@ app.get("/habits", async (req, res) => {
           day: true,
         },
       },
+      completionRecords: {
+        select: {
+          dateCompleted: true,
+        },
+      },
     },
   });
   res.json(habits);
@@ -85,10 +88,38 @@ app.get("/users", async (req, res) => {
 });
 
 app.post(`/completionRecord`, async (req, res) => {
-  const { habitId } = req.body;
+  const { habitId, dateCompleted } = req.body;
+  console.log(req.body);
+  const now = new Date();
+  const nowDate = new Date(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate()
+  );
+
   const result = await prisma.completionRecord.create({
     data: {
       habitId,
+      dateCompleted: dateCompleted ?? nowDate,
+    },
+  });
+  res.json(result);
+});
+
+app.delete(`/completionRecord`, async (req, res) => {
+  const { habitId, dateCompleted } = req.body;
+  console.log(req.body);
+  const now = new Date();
+  const nowDate = new Date(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate()
+  );
+
+  const result = await prisma.completionRecord.delete({
+    where: {
+      habitId,
+      dateCompleted: dateCompleted ?? nowDate,
     },
   });
   res.json(result);

@@ -35,7 +35,7 @@ model ScheduleDay {
 
 model CompletionRecord {
   id                  Int      @id @default(autoincrement())
-  dateCompleted       DateTime 
+  dateCompleted       DateTime @default(now())
   habit               Habit    @relation(fields: [habitId], references: [id])
   habitId             Int
 }
