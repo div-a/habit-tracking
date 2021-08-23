@@ -37,14 +37,22 @@ interface Habit {
   name: string;
   numDaysToComplete: number;
   scheduleDays: ScheduleDay[];
+  completionRecords: CompletionRecord[];
 }
 
 interface ScheduleDay {
   day: number;
 }
 
+interface CompletionRecord {
+  dateCompleted: Date;
+}
+
 export const App = () => {
   const [habits, setHabits] = useState<Habit[]>([]);
+  const [currentWeekCompletions, setcurrentWeekCompletions] = useState<Date[]>(
+    []
+  );
 
   useEffect(() => {
     async function fetchMyAPI() {
@@ -59,7 +67,11 @@ export const App = () => {
     console.log("habits ", habits);
   }, [habits]);
 
-  const onCheckCompletion = async (habitId: number, day: number) => {
+  const onCheckCompletion = async (
+    habitId: number,
+    day: number,
+    { target: { checked } }: any
+  ) => {
     const now = new Date();
     const nowDay = new Date().getDay();
     const dayDiff = day - nowDay;
@@ -69,12 +81,45 @@ export const App = () => {
       now.getUTCMonth(),
       now.getUTCDate() + dayDiff
     );
-    console.log(habitId, nowDate);
+
+    if (!checked) {
+      var habitsCopy = Object.values(Object.assign({}, habits));
+      console.log(habitsCopy);
+      habitsCopy.forEach((h) => {
+        if (h.id === habitId) {
+          h.completionRecords = h.completionRecords.filter(
+            (cr) => new Date(cr.dateCompleted).getTime() !== nowDate.getTime()
+          );
+        }
+      });
+      setHabits(habitsCopy);
+    } else {
+      var habitsCopy = Object.values(Object.assign({}, habits));
+      console.log(habitsCopy);
+      habitsCopy.forEach((h) => {
+        if (h.id === habitId) {
+          h.completionRecords.push({ dateCompleted: nowDate });
+        }
+      });
+      setHabits(habitsCopy);
+    }
 
     await instance.post("/completionRecord", {
       habitId,
       dateCompleted: nowDate,
     });
+  };
+
+  // TODO only check current week completion records!
+  const isChecked = (habit: Habit, day: number): boolean => {
+    var dates = habit.completionRecords.map((cr) =>
+      new Date(cr.dateCompleted).getDay()
+    );
+    if (dates.find((d) => d === day)) {
+      return true;
+    }
+
+    return false;
   };
 
   return (
@@ -127,7 +172,10 @@ export const App = () => {
                           {habit.scheduleDays.find((sd) => sd.day === day) && (
                             <Checkbox
                               value={day}
-                              onChange={() => onCheckCompletion(habit.id, day)}
+                              isChecked={isChecked(habit, day)}
+                              onChange={(e) =>
+                                onCheckCompletion(habit.id, day, e)
+                              }
                             ></Checkbox>
                           )}
                         </Td>
