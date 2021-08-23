@@ -33,6 +33,13 @@ app.post(`/signup`, async (req, res) => {
 
 app.post(`/habit`, async (req, res) => {
   const { name, numDaysToComplete, authorEmail, schedule } = req.body;
+  console.log(req.body)
+  // const r = await prisma.scheduleDay.create({
+  //   data: {
+  //     schedule
+  //   },
+  // });
+
   const result = await prisma.habit.create({
     data: {
       name,
